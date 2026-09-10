@@ -1,0 +1,23 @@
+# Стек PyTorch — ставится ОТДЕЛЬНО от PyPI, с индекса PyTorch (сборка под CUDA 12.4).
+#
+# Почему cu124, а не cu126/cu128:
+#   gigaam==0.1.0 объявляет `torch<=2.5.1` и `torchaudio<=2.5.1` (см. requires_dist
+#   на PyPI). Значит верхняя граница стека — torch 2.5.1, а самая свежая сборка
+#   torch 2.5.1 на индексе PyTorch — +cu124. Проверено: колесо
+#   torch-2.5.1+cu124-cp311-cp311-linux_x86_64.whl существует.
+#
+# Почему это совместимо с базовым образом CUDA 12.6:
+#   linux-колёса torch тянут собственные nvidia-*-cu12 пакеты (cublas/cudnn/...),
+#   то есть torch не зависит от версии CUDA в образе — только от драйвера,
+#   а драйвер CUDA 12.6 обратно совместим с бинарями, собранными под 12.4.
+#
+# RTX 4060 — архитектура Ada (sm_89), поддерживается всеми сборками cu12x.
+#
+# Установка:
+#   pip install --index-url https://download.pytorch.org/whl/cu124 -r requirements-torch.txt
+
+--index-url https://download.pytorch.org/whl/cu124
+
+torch==2.5.1+cu124
+torchvision==0.20.1+cu124
+torchaudio==2.5.1+cu124

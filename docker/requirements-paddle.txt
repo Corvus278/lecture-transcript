@@ -1,0 +1,27 @@
+# PaddlePaddle GPU — ставится ОТДЕЛЬНО, с официального индекса PaddlePaddle.
+#
+# На PyPI пакета `paddlepaddle-gpu` новее 2.6.2 НЕТ (проверено:
+# https://pypi.org/pypi/paddlepaddle-gpu/json — последний релиз 2.6.2, сборка под
+# CUDA 11.x). GPU-колёса ветки 3.x публикуются только на собственном индексе
+# PaddlePaddle, отдельным каталогом на каждую версию CUDA.
+#
+# Версия 3.2.0 выбрана под `paddleocr==3.2.0` / `paddlex==3.2.0` (одна релизная
+# линия). Косвенная проверка: CPU-двойник `paddlepaddle==3.2.0` на PyPI есть,
+# колесо cp311 manylinux1_x86_64 присутствует — GPU-колёса той же версии
+# публикуются тем же релизным процессом.
+#
+# ВНИМАНИЕ: индекс paddlepaddle.org.cn недоступен с dev-машины, поэтому наличие
+# конкретного файла НЕ проверено. Это единственный пин в проекте, который
+# проверяется только на целевой машине. См. docker/README.md → «Не проверено».
+# Если версии на индексе нет — взять ближайшую доступную из каталога cu126:
+#   https://www.paddlepaddle.org.cn/packages/stable/cu126/paddlepaddle-gpu/
+#
+# Каталог cu126 согласован с базовым образом (CUDA 12.6 + cuDNN 9).
+#
+# Установка:
+#   pip install --index-url https://www.paddlepaddle.org.cn/packages/stable/cu126/ \
+#       -r requirements-paddle.txt
+
+--index-url https://www.paddlepaddle.org.cn/packages/stable/cu126/
+
+paddlepaddle-gpu==3.2.0

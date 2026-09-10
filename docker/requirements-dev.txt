@@ -1,0 +1,15 @@
+# Зависимости для тестов и разработки внутри контейнера.
+# Ставятся поверх requirements.txt отдельным слоем (ARG INSTALL_DEV=1),
+# чтобы прод-образ не тащил тестовый инструментарий.
+#
+# Версии выровнены на pyproject.toml ([project.optional-dependencies].dev).
+
+pytest==8.3.4
+pytest-timeout==2.3.1
+
+# Плагины, полезные для маркеров из pyproject.toml (reference/gpu/models/slow):
+# запуск подмножеств и понятный отчёт о пропусках.
+pytest-xdist==3.6.1
+
+# Форматирование/линт — один инструмент вместо связки black+flake8+isort.
+ruff==0.8.4

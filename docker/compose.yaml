@@ -1,0 +1,69 @@
+# Запуск пайплайна lecture-transcript на целевой машине (WSL2 + Docker + RTX 4060).
+#
+#   docker compose -f docker/compose.yaml build
+#   docker compose -f docker/compose.yaml run --rm lecture-transcript verify_env.sh
+#
+# Контекст сборки — корень репозитория, поэтому все пути в Dockerfile
+# начинаются с docker/.
+
+name: lecture-transcript
+
+services:
+  lecture-transcript:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        INSTALL_DEV: "1"
+    image: lecture-transcript:0.1.0
+
+    # Проброс всех GPU. Поле верхнего уровня `gpus` поддерживается
+    # Docker Compose v2.30+; для более старых версий вместо него —
+    # закомментированный блок deploy.resources ниже.
+    gpus: all
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu, video]
+
+    environment:
+      # Дублирует ENV из Dockerfile: `video` обязателен, иначе в контейнер
+      # не попадёт libnvcuvid.so.1 и nvdec не заработает.
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility,video
+      PYTHONPATH: /app/src
+      # Ни один этап не ходит в сеть на прогоне (задачи 4.9 и 5.8): веса должны
+      # быть уже в /cache. Значение "1" делает это поведением по умолчанию —
+      # при отсутствии весов будет внятная ошибка, а не тихая выкачка из сети.
+      # Разовый прогрев кэша — с явным переопределением:
+      #   HF_HUB_OFFLINE=0 docker compose -f docker/compose.yaml run --rm \
+      #       lecture-transcript python -m lecture_transcript.warmup
+      HF_HUB_OFFLINE: "${HF_HUB_OFFLINE:-1}"
+
+    volumes:
+      # Исходники монтируются, а не копируются в образ: правка кода не требует
+      # пересборки, пересборка нужна только при смене зависимостей.
+      - ..:/app
+      # Входные записи — только на чтение, портить оригиналы нечем.
+      - ${LECTURE_INPUT_DIR:-../input}:/data/input:ro
+      # Результаты прогона: transcript.md и PNG слайдов.
+      - ${LECTURE_OUTPUT_DIR:-../output}:/data/output
+      # Кэш весов моделей и промежуточных артефактов (design D8).
+      # Именованный том — переживает пересборку образа, несколько гигабайт
+      # весов не качаются заново.
+      - model-cache:/cache
+
+    working_dir: /app
+
+    # PaddleOCR и torch используют разделяемую память для воркеров;
+    # дефолтных 64 MB не хватает.
+    shm_size: "2gb"
+
+    stdin_open: true
+    tty: true
+
+volumes:
+  model-cache:
