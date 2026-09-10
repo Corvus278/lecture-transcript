@@ -1,0 +1,40 @@
+[project]
+name = "lecture-transcript"
+version = "0.1.0"
+description = "Локальный пайплайн mp4 -> transcript.md для записей лекций"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "opencv-python-headless>=4.10",
+    "Pillow>=10.3",
+    "ImageHash>=4.3",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-timeout>=2.3",
+]
+
+[project.scripts]
+lecture-transcript = "lecture_transcript.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+lecture_transcript = ["*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "reference: тест требует эталонную запись wr_20260909_1150.mp4",
+    "gpu: тест требует CUDA GPU",
+    "models: тест требует локально скачанные веса моделей",
+    "slow: длительный тест",
+]

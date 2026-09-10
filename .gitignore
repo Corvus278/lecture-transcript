@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+/out/
+/cache/
+tests/fixtures/*.mp4
+tests/fixtures/*.wav
+tests/fixtures/*.png
+*.egg-info/
